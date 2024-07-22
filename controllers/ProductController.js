@@ -231,7 +231,7 @@ export const updateProduct = async (req, res) => {
     if (req.file) {
       updatedData.image = req.file.filename;
 
-      fs.unlink(oldImagePath, (err) => {
+       fs.unlinkSync(oldImagePath, (err) => {
         if (err) {
           return res.status(500).json({
             error: `error deleting the old image`,

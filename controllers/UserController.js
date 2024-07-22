@@ -318,11 +318,13 @@ export const loggedInUser = (req, res) => {
 
 export const logOut = async (req, res) => {
   try {
-    await res
-      .clearCookie("token")
-      .status(200)
-      .json({ message: "Successfully Logged Out!" });
-    // return res.status(200).json({ message: "Logout successful" });
+    await res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+
+    return res.status(200).json({ message: "Logout successful" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal Server Error" });
