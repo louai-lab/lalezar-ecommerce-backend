@@ -9,7 +9,7 @@ export const authenticate = async (req, res, next) => {
     const decoded = verifyToken(token);
     req.user = decoded;
 
-    console.log(req.user);
+    // console.log(req.user);
 
     next();
   } catch (error) {
