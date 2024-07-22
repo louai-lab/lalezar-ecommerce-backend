@@ -27,7 +27,10 @@ app.use("/images", express.static("images"));
 
 const corsOption = {
   // origin: [process.env.FRONT_END_PATH, "https://lalezar-frontend.vercel.app"],
-  origin: process.env.FRONT_END_PATH,
+  origin: [
+    process.env.FRONT_END_PATH,
+    "https://lalezar-ecommerce-frontend.vercel.app",
+  ],
   credentials: true,
   optionsSuccessStatus: 200,
 };
