@@ -318,8 +318,10 @@ export const loggedInUser = (req, res) => {
 
 export const logOut = async (req, res) => {
   try {
+    const token = req.cookies;  
+    console.log(token);
     await res.clearCookie("token");
-    console.log("cleared cooky")
+    // console.log("cleared cooky")
     return res.status(200).json({ message: "Logout successful" });
   } catch (err) {
     console.error(err);
