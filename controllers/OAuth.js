@@ -18,7 +18,10 @@ export const google = async (req, res, next) => {
       const token = generateToken(user);
       const { password, ...rest } = user.toObject();
       // console.log(rest);
-      res.cookie("token", token, { httpOnly: true }).status(200).json(rest);
+      return res
+        .cookie("token", token, { httpOnly: true })
+        .status(200)
+        .json(rest);
     } else {
       const generatedPassword =
         Math.random().toString(36).slice(-8) +

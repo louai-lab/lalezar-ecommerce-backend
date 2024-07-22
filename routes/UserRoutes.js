@@ -26,5 +26,6 @@ userRouter.post("/login", logIn);
 userRouter.post("/logout", logOut);
 userRouter.get("/logged-in-user", authenticate, loggedInUser);
 userRouter.post("/google", google, loggedInUser);
+// userRouter.post("/google", google);
 
 export default userRouter;
