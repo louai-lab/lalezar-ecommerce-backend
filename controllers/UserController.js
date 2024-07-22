@@ -316,13 +316,37 @@ export const loggedInUser = (req, res) => {
   return res.json({ user: req.user }).status(200);
 };
 
+// export const logOut = async (req, res) => {
+//   try {
+//     const token = req.cookies.token;
+//     console.log(token);
+//     await res.clearCookie("token" , token);
+//     // console.log("cleared cooky")
+//     return res.status(200).json({ message: "Logout successful" });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 export const logOut = async (req, res) => {
   try {
-    const token = req.cookies;  
-    console.log(token);
-    await res.clearCookie("token");
-    // console.log("cleared cooky")
-    return res.status(200).json({ message: "Logout successful" });
+    const token = req.cookies.token;
+    console.log("Token before clear:", token);
+
+    if (token) {
+      await res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict", 
+      });
+      console.log("Token cleared");
+
+      return res.status(200).json({ message: "Logout successful" });
+    } else {
+      console.log("No token found");
+      return res.status(400).json({ error: "No token found" });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal Server Error" });
