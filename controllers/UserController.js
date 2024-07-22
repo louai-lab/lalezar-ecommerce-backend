@@ -312,7 +312,7 @@ export const SignUp = async (req, res) => {
 };
 
 export const loggedInUser = (req, res) => {
-  // console.log("login in in ", req.user);
+  console.log("login in in ", req.user);
   return res.json({ user: req.user }).status(200);
 };
 
