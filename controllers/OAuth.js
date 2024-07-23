@@ -9,17 +9,20 @@ dotenv.config();
 export const google = async (req, res, next) => {
   const { name, email, image } = req.body;
 
-  // console.log("1", image);
-  // console.log("2", req.body.photo);
   try {
     const user = await User.findOne({ email });
 
     if (user) {
+      console.log("we found the user :", user);
       const token = generateToken(user);
       const { password, ...rest } = user.toObject();
-      // console.log(rest);
+      console.log("rest with token ", rest, token);
       return res
-        .cookie("token", token, { httpOnly: true })
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "None",
+        })
         .status(200)
         .json(rest);
     } else {
