@@ -13,10 +13,10 @@ export const google = async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (user) {
-      console.log("we found the user :", user);
+      // console.log("we found the user :", user);
       const token = generateToken(user);
       const { password, ...rest } = user.toObject();
-      console.log("rest with token ", rest, token);
+      // console.log("rest with token ", rest, token);
       return res
         .cookie("token", token, {
           httpOnly: true,
