@@ -1,35 +1,25 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const commentSchema = new mongoose.Schema(
-    {
-      name: {
-        type: String,
-        required: true,
-      },
-      description: {
-        type: String,
-        required: true,
-      },
-      type: {
-        type: String,
-        required: true,
-        enum: ['comment', 'reply']
-      },
-      parent: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-      },
-      replies:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'CommentModel',
-        required: false,
-      }],
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    {
-      timestamps: true,
-    }
-  );
+    blogId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Blog",
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const CommentModel = mongoose.model('CommentModel', commentSchema);
+const CommentModel = mongoose.model("CommentModel", commentSchema);
 
 export default CommentModel;

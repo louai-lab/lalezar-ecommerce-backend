@@ -4,15 +4,17 @@ import Comment from "../models/CommentModel.js";
 import deleteCommentUtil from "../utils/deleteCommentUtil.js";
 
 export const addComment = async (req, res) => {
-  const { name, description, id } = req.body;
+  const { userId, blogId, description } = req.body;
 
-  if (!mongoose.isValidObjectId(id)) {
+  // console.log(userId, blogId, description);
+
+  if (!mongoose.isValidObjectId(blogId)) {
     return res.status(404).json({
       message: "Error! Attempting to save to an invalid blog id",
     });
   }
 
-  const blog = await Blog.findById(id);
+  const blog = await Blog.findById(blogId);
 
   if (!blog) {
     return res.status(404).json({
@@ -20,28 +22,24 @@ export const addComment = async (req, res) => {
     });
   }
 
-  if (!name || !description) {
+  if (!description) {
     return res.status(404).json({
-      message: "Error! Invalid input: name or description",
+      message: "Error! Invalid input: description",
     });
   }
 
   try {
-    const newComment = await Comment.create({
-      name,
+    const newComment = new Comment({
+      userId,
+      blogId,
       description,
-      type: "comment",
-      replies: [],
-      parent: id,
     });
     const savedComment = await newComment.save();
 
     await Blog.findByIdAndUpdate(
-      id,
+      blogId,
       {
-        $set: {
-          comments: [...blog.comments, savedComment._id],
-        },
+        $push: { comments: savedComment._id },
       },
       { new: true }
     );
@@ -55,6 +53,61 @@ export const addComment = async (req, res) => {
     });
   }
 };
+
+// export const addComment = async (req, res) => {
+//   const { name, description, id } = req.body;
+
+//   console.log(name, description, id);
+
+//   if (!mongoose.isValidObjectId(id)) {
+//     return res.status(404).json({
+//       message: "Error! Attempting to save to an invalid blog id",
+//     });
+//   }
+
+//   const blog = await Blog.findById(id);
+
+//   if (!blog) {
+//     return res.status(404).json({
+//       message: "Error! Can't find blog parent!",
+//     });
+//   }
+
+//   if (!name || !description) {
+//     return res.status(404).json({
+//       message: "Error! Invalid input: name or description",
+//     });
+//   }
+
+//   try {
+//     const newComment = await Comment.create({
+//       name,
+//       description,
+//       // type: "comment",
+//       // replies: [],
+//       // parent: id,
+//     });
+//     const savedComment = await newComment.save();
+
+//     await Blog.findByIdAndUpdate(
+//       id,
+//       {
+//         $set: {
+//           comments: [...blog.comments, savedComment._id],
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     return res.status(200).json({
+//       message: "Comment created successfully!",
+//     });
+//   } catch (error) {
+//     return res.status(400).json({
+//       message: "Error! Having trouble saving comment!",
+//     });
+//   }
+// };
 
 export const getAllComments = async (req, res) => {
   try {

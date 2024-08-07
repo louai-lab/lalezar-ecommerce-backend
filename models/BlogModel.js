@@ -5,7 +5,7 @@ const blogSchema = new mongoose.Schema(
     title_en: {
       type: String,
       required: true,
-      unique:true,
+      unique: true,
     },
     title_ar: {
       type: String,
@@ -19,26 +19,30 @@ const blogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    images: [{
-      type: String, 
-      required: false,
-    }],
+    // images: [
+    //   {
+    //     type: String,
+    //     required: false,
+    //   },
+    // ],
+    image: {
+      type: String,
+      required: true,
+    },
     video: {
       type: String,
       required: false,
     },
-    likes:{
-      type: Number,
-      required: false,
-    },
-    slug:{
+    slug: {
       type: String,
       required: true,
     },
-    comments:[{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'CommentModel',
-    }],
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "CommentModel",
+      },
+    ],
   },
   {
     timestamps: true,
