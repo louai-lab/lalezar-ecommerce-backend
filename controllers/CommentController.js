@@ -44,9 +44,11 @@ export const addComment = async (req, res) => {
       { new: true }
     );
 
-    return res.status(200).json({
-      message: "Comment created successfully!",
-    });
+    const populatedComment = await Comment.findById(savedComment._id)
+      .populate("userId", "firstName lastName image")
+      .exec();
+
+    return res.status(200).json(populatedComment);
   } catch (error) {
     return res.status(400).json({
       message: "Error! Having trouble saving comment!",
@@ -54,64 +56,9 @@ export const addComment = async (req, res) => {
   }
 };
 
-// export const addComment = async (req, res) => {
-//   const { name, description, id } = req.body;
-
-//   console.log(name, description, id);
-
-//   if (!mongoose.isValidObjectId(id)) {
-//     return res.status(404).json({
-//       message: "Error! Attempting to save to an invalid blog id",
-//     });
-//   }
-
-//   const blog = await Blog.findById(id);
-
-//   if (!blog) {
-//     return res.status(404).json({
-//       message: "Error! Can't find blog parent!",
-//     });
-//   }
-
-//   if (!name || !description) {
-//     return res.status(404).json({
-//       message: "Error! Invalid input: name or description",
-//     });
-//   }
-
-//   try {
-//     const newComment = await Comment.create({
-//       name,
-//       description,
-//       // type: "comment",
-//       // replies: [],
-//       // parent: id,
-//     });
-//     const savedComment = await newComment.save();
-
-//     await Blog.findByIdAndUpdate(
-//       id,
-//       {
-//         $set: {
-//           comments: [...blog.comments, savedComment._id],
-//         },
-//       },
-//       { new: true }
-//     );
-
-//     return res.status(200).json({
-//       message: "Comment created successfully!",
-//     });
-//   } catch (error) {
-//     return res.status(400).json({
-//       message: "Error! Having trouble saving comment!",
-//     });
-//   }
-// };
-
 export const getAllComments = async (req, res) => {
   try {
-    const comments = await Comment.find();
+    const comments = await Comment.find().populate("user", "name image role");
 
     return res.status(200).json(comments);
   } catch (error) {
@@ -132,7 +79,10 @@ export const getOneComment = async (req, res) => {
   }
 
   try {
-    const comment = await Comment.findById(id).populate("user", "name image");
+    const comment = await Comment.findById(id).populate(
+      "user",
+      "name image role"
+    );
 
     return res.status(200).json(comment);
   } catch (error) {
@@ -205,16 +155,20 @@ export const updateComment = async (req, res) => {
 };
 
 export const deleteComment = async (req, res) => {
-  const id = req.body.id;
+  const { commentId, blogId } = req.body;
 
-  if (!mongoose.isValidObjectId(id)) {
+  if (
+    !mongoose.isValidObjectId(commentId) ||
+    !mongoose.isValidObjectId(blogId)
+  ) {
     return res.status(404).json({
-      message: "Error! Attempting to delete to an invalid comment id",
+      message: "Error! Invalid comment or blog ID",
     });
   }
 
   try {
-    const deletedComment = await Comment.findByIdAndDelete(id);
+    // Delete the comment
+    const deletedComment = await Comment.findByIdAndDelete(commentId);
 
     if (!deletedComment) {
       return res.status(404).json({
@@ -222,57 +176,16 @@ export const deleteComment = async (req, res) => {
       });
     }
 
-    //handle deleting comment reference in parent element
-    switch (deletedComment.type) {
-      case "comment": {
-        const blog = await Blog.findById(deletedComment.parent);
-        let prevArray = blog.comments;
-        prevArray = prevArray.filter(
-          (item) => item.toString() != deletedComment._id.toString()
-        );
-        await Blog.findByIdAndUpdate(
-          deletedComment.parent,
-          {
-            $set: {
-              comments: prevArray,
-            },
-          },
-          { new: false }
-        );
-        break;
-      }
-      case "reply": {
-        const comment = await Comment.findById(deletedComment.parent);
-        let prevArray = comment.replies;
-        prevArray = prevArray.filter(
-          (item) => item.toString() != deletedComment._id.toString()
-        );
-        await Comment.findByIdAndUpdate(
-          deletedComment.parent,
-          {
-            $set: {
-              replies: prevArray,
-            },
-          },
-          { new: false }
-        );
-        break;
-      }
-      default: {
-        return res.status(500).json({
-          message: "Error! cannot specify comment type!",
-        });
-      }
-    }
+    // Update the blog by removing the comment ID from its comments array
+    const updateResult = await Blog.updateOne(
+      { _id: blogId },
+      { $pull: { comments: commentId } }
+    );
 
-    //delete all children comments
-    if (deletedComment.replies && deletedComment.replies.length > 0) {
-      // for(let i=0; i < deletedComment.replies.length; i++){
-      //     await Comment.findByIdAndDelete(deletedComment.replies[i], res);
-      // }
-      for (let i = 0; i < deletedComment.replies.length; i++) {
-        deleteCommentUtil(deletedComment.replies[i]);
-      }
+    if (updateResult.modifiedCount === 0) {
+      return res.status(404).json({
+        message: "Error! Blog not found or comment not in the blog",
+      });
     }
 
     return res.status(200).json({
