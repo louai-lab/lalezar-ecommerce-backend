@@ -13,6 +13,7 @@ export const generateToken = (user) => {
       role: user.role,
       firstName: user.firstName,
       lastName: user.lastName,
+      phoneNumber: user.phoneNumber,
       image: user.image,
     },
     secret,

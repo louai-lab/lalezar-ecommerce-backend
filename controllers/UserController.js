@@ -70,6 +70,10 @@ export const editUser = async (req, res) => {
     phoneNumber,
   } = req.body;
 
+  // console.log(req.body);
+
+  // console.log(id);
+
   try {
     if (!mongoose.isValidObjectId(id)) {
       return res.status(400).json({ error: "Invalid user ID" });
