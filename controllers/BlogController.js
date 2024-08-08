@@ -92,14 +92,16 @@ export const addBlog = async (req, res) => {
 
 export const getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find().populate({
-      path: "comments",
-      select: "description createdAt userId",
-      populate: {
-        path: "userId",
-        select: "firstName lastName image",
-      },
-    });
+    const blogs = await Blog.find()
+      .populate({
+        path: "comments",
+        select: "description createdAt userId",
+        populate: {
+          path: "userId",
+          select: "firstName lastName image",
+        },
+      })
+      .sort({ createdAt: -1 });
 
     // console.log(blogs);
 
@@ -116,7 +118,7 @@ export const getOneBlog = async (req, res) => {
   const id = req.body.id;
   const slug = req.body.slug;
 
-//   console.log(id, slug);
+  //   console.log(id, slug);
 
   try {
     if (id && !mongoose.isValidObjectId(id)) {
